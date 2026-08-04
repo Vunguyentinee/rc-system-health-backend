@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dang ky</title>
+  <link rel="stylesheet" href="css/register.css">
+</head>
+<body>
+  <div class="card">
+    <h2>Đăng lý</h2>
+    <div class="muted">Tạo tài khoản để vào Dashboard</div>
+
+    <label>UserName</label>
+    <input id="registerUserName" placeholder="VD: Nguyen Van A" />
+
+    <label>Email</label>
+    <input id="registerEmail" placeholder="Anv@example.com" />
+
+    <label>Mật khẩu</label>
+    <input id="registerPassword" type="password" placeholder="Tối thiếu 8 ký tự" />
+
+    <button class="btn-success" onclick="register()">Đăng ký</button>
+    <div class="actions">
+      <button onclick="goLogin()">Quay lại đăng nhập</button>
+      <button onclick="goDashboard()">Vào thẳng dashboard</button>
+    </div>
+
+    <div id="registerMsg" class="muted" style="margin-top: 8px;"></div>
+  </div>
+
+  <script src="js/register.js"></script>
+</body>
+</html>
+

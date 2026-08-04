@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đăng nhập</title>
+  <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+  <div class="card">
+    <h2>Đăng nhập</h2>
+    <div class="muted">Đăng nhập để vào DashBoard</div>
+
+    <label>UserName</label>
+    <input id="loginUserName" placeholder="Nguyen Van A" />
+
+    <label>Mật khẩu</label>
+    <input id="loginPassword" type="password" placeholder="Nhập mật khẩu" />
+
+    <button class="btn-success" onclick="login()">Đăng nhập</button>
+    <div class="actions">
+      <button onclick="goRegister()">Đăng ký</button>
+<!--      <button onclick="goDashboard()">Vào thẳng Dashboard</button>-->
+    </div>
+
+    <div id="loginMsg" class="muted" style="margin-top: 8px;"></div>
+  </div>
+
+  <script src="js/login.js"></script>
+</body>
+</html>
+
