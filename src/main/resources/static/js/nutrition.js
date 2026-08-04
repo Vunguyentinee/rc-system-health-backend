@@ -6,7 +6,7 @@ let latestFoods = [];
     let ratedFoodIdsInCurrentSuggestion = new Set();
 
     function getValue(id) { return document.getElementById(id).value; }
-    function baseUrl() { return window.location.origin; }
+    function baseUrl() { return "https://rc-system-health-backend.onrender.com"; }
 
     function getSession() {
       const raw = localStorage.getItem('session');

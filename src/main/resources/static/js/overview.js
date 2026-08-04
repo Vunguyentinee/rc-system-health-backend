@@ -6,7 +6,7 @@ function getTodayKey() {
     }
 
     function baseUrl() {
-      return window.location.origin;
+      return "https://rc-system-health-backend.onrender.com";
     }
 
     let activityCalendarDate = new Date();

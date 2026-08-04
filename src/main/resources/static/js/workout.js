@@ -60,7 +60,7 @@ let workoutPlan = null;
     function hydrateSessionUser(session) {
       renderNavbar(session);
       if (!session || session.userName) return;
-      fetch(`${window.location.origin}/api/auth/users/${session.userId}`)
+      fetch(`https://rc-system-health-backend.onrender.com/api/auth/users/${session.userId}`)
         .then(res => res.ok ? res.json() : null)
         .then(user => {
           if (!user) return;
@@ -82,7 +82,7 @@ let workoutPlan = null;
       const session = ensureSession();
       if (!session) return;
       const query = new URLSearchParams({ userId: session.userId, regenerate });
-      apiJson(`${window.location.origin}/api/workouts/recommend?${query}`)
+      apiJson(`https://rc-system-health-backend.onrender.com/api/workouts/recommend?${query}`)
         .then(data => {
           workoutPlan = data;
           document.getElementById('workoutMessage').textContent =
@@ -98,7 +98,7 @@ let workoutPlan = null;
       const session = ensureSession();
       if (!session) return Promise.resolve();
       const query = new URLSearchParams({ userId: session.userId, date: getTodayKey() });
-      return apiJson(`${window.location.origin}/api/workouts/history?${query}`)
+      return apiJson(`https://rc-system-health-backend.onrender.com/api/workouts/history?${query}`)
         .then(data => {
           workoutHistory = data;
           renderWorkoutHistory();
@@ -109,7 +109,7 @@ let workoutPlan = null;
     function completeWorkout(detailId) {
       const session = ensureSession();
       if (!session) return;
-      apiJson(`${window.location.origin}/api/workouts/complete`, {
+      apiJson(`https://rc-system-health-backend.onrender.com/api/workouts/complete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: session.userId, detailId })
@@ -121,7 +121,7 @@ let workoutPlan = null;
     function rateWorkout(detailId, rating) {
       const session = ensureSession();
       if (!session) return;
-      apiJson(`${window.location.origin}/api/workouts/rate`, {
+      apiJson(`https://rc-system-health-backend.onrender.com/api/workouts/rate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: session.userId, detailId, rating })

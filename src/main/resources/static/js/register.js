@@ -3,7 +3,7 @@ function setSession(userId, userName, role) {
     }
 
     function baseUrl() {
-      return window.location.origin;
+      return "https://rc-system-health-backend.onrender.com";
     }
 
     function register() {
