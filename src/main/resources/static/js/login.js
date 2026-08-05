@@ -10,9 +10,21 @@ function setSession(userId, userName, role) {
       const userName = document.getElementById('loginUserName').value.trim();
       const password = document.getElementById('loginPassword').value;
       if (!userName || !password) {
-        document.getElementById('loginMsg').textContent = 'Vui lòng nhập UserName và mật  khẩu';
+        document.getElementById('loginMsg').textContent = 'Vui lòng nhập UserName và mật khẩu';
         return;
       }
+      
+      const msgEl = document.getElementById('loginMsg');
+      const btnEl = document.querySelector('button[onclick="login()"]');
+      
+      // Cap nhat trang thai dang load
+      msgEl.textContent = 'Đang xử lý đăng nhập...';
+      msgEl.style.color = '#3182ce';
+      if (btnEl) {
+        btnEl.disabled = true;
+        btnEl.textContent = 'Đang xử lý...';
+      }
+      
       fetch(`${baseUrl()}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -21,14 +33,31 @@ function setSession(userId, userName, role) {
         .then(res => res.json().then(data => ({ ok: res.ok, data })))
         .then(({ ok, data }) => {
           if (!ok) {
-            document.getElementById('loginMsg').textContent = data.message || 'Đăng nhập thất bại';
+            msgEl.textContent = data.message || 'Đăng nhập thất bại';
+            msgEl.style.color = '#e53e3e';
+            if (btnEl) {
+              btnEl.disabled = false;
+              btnEl.textContent = 'Đăng nhập';
+            }
             return;
           }
+          
+          // Đăng nhập thành công
+          msgEl.textContent = 'Đăng nhập thành công! Đang chuyển hướng...';
+          msgEl.style.color = '#38a169';
           setSession(data.userId, data.userName, data.role || 'user');
-          window.location.href = 'overview.html';
+          
+          setTimeout(() => {
+            window.location.href = 'overview.html';
+          }, 800);
         })
         .catch(err => {
-          document.getElementById('loginMsg').textContent = err.message;
+          msgEl.textContent = 'Lỗi kết nối: ' + err.message;
+          msgEl.style.color = '#e53e3e';
+          if (btnEl) {
+            btnEl.disabled = false;
+            btnEl.textContent = 'Đăng nhập';
+          }
         });
     }
 

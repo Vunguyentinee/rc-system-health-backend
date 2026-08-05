@@ -310,6 +310,23 @@ let latestFoods = [];
           renderActionFoods(latestFoods);
           renderCalories(latestFoods);
           document.getElementById('dashMsg').textContent = `Đã tải lên ${latestFoods.length} món.`;
+          
+          return fetch(`${baseUrl()}/api/nutrition/history?userId=${userId}`);
+        })
+        .then(res => res && res.ok ? res.json() : null)
+        .then(historyData => {
+          if (historyData && Array.isArray(historyData.data)) {
+            const logTextArea = document.getElementById('actionLog');
+            if (logTextArea) {
+              const logLines = historyData.data.map(item => {
+                const dateObj = item.logDate ? new Date(item.logDate) : new Date();
+                const timeStr = dateObj.toLocaleTimeString();
+                const ratingStr = (item.rating !== null && item.rating !== undefined) ? ` và chấm điểm ${item.rating}★` : '';
+                return `[${timeStr}] Đã hoàn thành${ratingStr} cho món: ${item.name}`;
+              });
+              logTextArea.value = logLines.join('\n');
+            }
+          }
         })
         .catch(err => {
           document.getElementById('dashMsg').textContent = err.message;
