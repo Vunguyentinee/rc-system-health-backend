@@ -4,6 +4,8 @@ let latestFoods = [];
     let selectedRating = 5;
     let currentProfile = null;
     let ratedFoodIdsInCurrentSuggestion = new Set();
+    let selectedOnboardFoodIds = new Set();
+    let allOnboardFoods = [];
 
     function getValue(id) { return document.getElementById(id).value; }
     function baseUrl() { return "https://rc-system-health-backend.onrender.com"; }
@@ -189,6 +191,9 @@ let latestFoods = [];
         .then(profile => {
           setProfile(session.userId, profile);
           document.getElementById('surveyMsg').textContent = 'Đã lưu hồ sơ (server).';
+          selectedOnboardFoodIds.clear();
+          const searchInput = document.getElementById('onboardSearchInput');
+          if (searchInput) searchInput.value = '';
           showPage('page-onboarding');
           loadPopularFoods();
         })
@@ -231,35 +236,92 @@ let latestFoods = [];
       return Math.round(bmr * activity);
     }
 
+    function removeAccents(str) {
+      return str.normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/đ/g, 'd')
+                .replace(/Đ/g, 'D');
+    }
+
+    function renderOnboardFoods(foods) {
+      const container = document.getElementById('popularFoods');
+      if (!container) return;
+      if (!foods.length) {
+        container.innerHTML = '<div class="muted" style="grid-column: 1/-1; text-align: center; padding: 20px;">Không tìm thấy món ăn nào khớp với từ khóa.</div>';
+        return;
+      }
+      container.innerHTML = foods.map(food => {
+        const isChecked = selectedOnboardFoodIds.has(String(food.id)) ? 'checked' : '';
+        return `
+          <div class="food-item">
+            ${renderFoodImage(food)}
+            <label>
+              <input type="checkbox" class="favFood" value="${food.id}" ${isChecked} onchange="toggleOnboardFavorite(this)" />
+              <span class="food-title">${food.name}</span>
+            </label>
+            <div class="food-meta">${food.category} • ${food.calories} kcal</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleOnboardFavorite(checkbox) {
+      if (checkbox.checked) {
+        selectedOnboardFoodIds.add(checkbox.value);
+      } else {
+        selectedOnboardFoodIds.delete(checkbox.value);
+      }
+    }
+
     function loadPopularFoods() {
       const url = `${baseUrl()}/api/recommend-popular?topK=20`;
       fetch(url)
         .then(res => res.json())
         .then(data => {
           const foods = data.data || [];
-          const container = document.getElementById('popularFoods');
-          container.innerHTML = foods.map(food => `
-            <div class="food-item">
-              ${renderFoodImage(food)}
-              <label>
-                <input type="checkbox" class="favFood" value="${food.id}" />
-                <span class="food-title">${food.name}</span>
-              </label>
-              <div class="food-meta">${food.category} • ${food.calories} kcal</div>
-            </div>
-          `).join('');
+          renderOnboardFoods(foods);
         })
         .catch(err => {
           document.getElementById('onboardMsg').textContent = err.message;
         });
     }
 
+    function searchOnboardFoods() {
+      const input = document.getElementById('onboardSearchInput');
+      const query = input ? input.value.trim().toLowerCase() : '';
+      if (!query) {
+        loadPopularFoods();
+        return;
+      }
+      
+      const fetchPromise = allOnboardFoods.length > 0 
+        ? Promise.resolve(allOnboardFoods)
+        : fetch(`${baseUrl()}/api/admin/foods`)
+            .then(res => res.json())
+            .then(data => {
+              allOnboardFoods = data || [];
+              return allOnboardFoods;
+            });
+            
+      fetchPromise.then(foods => {
+        const filtered = foods.filter(f => {
+          const nameMatch = (f.name || '').toLowerCase().includes(query) || 
+                            removeAccents(f.name || '').toLowerCase().includes(removeAccents(query));
+          const catMatch = (f.category || '').toLowerCase().includes(query) ||
+                           removeAccents(f.category || '').toLowerCase().includes(removeAccents(query));
+          return nameMatch || catMatch;
+        });
+        renderOnboardFoods(filtered);
+      }).catch(err => {
+        document.getElementById('onboardMsg').textContent = err.message;
+      });
+    }
+
     function saveFavorites() {
       const session = ensureSession();
       if (!session) return;
       const userId = session.userId;
-      const selected = Array.from(document.querySelectorAll('.favFood:checked'))
-        .map(el => el.value);
+      const selected = Array.from(selectedOnboardFoodIds).map(Number);
       if (selected.length < 3) {
         document.getElementById('onboardMsg').textContent = 'Vui lòng chọn ít nhất 3 món.';
         return;
@@ -268,7 +330,7 @@ let latestFoods = [];
       fetch(`${baseUrl()}/api/nutrition/favorites`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, foodIds: selected.map(Number), rating: 5 })
+        body: JSON.stringify({ userId, foodIds: selected, rating: 5 })
       })
         .then(res => res.json().then(data => {
           if (!res.ok) {
