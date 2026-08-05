@@ -7,6 +7,8 @@ let latestFoods = [];
     let selectedOnboardFoodIds = new Set();
     let allOnboardFoods = [];
 
+    const MEDIA_BASE_URL = ""; // Change to CDN / Cloud Storage URL if migrating assets (e.g. "https://res.cloudinary.com/your-cloud-name")
+
     function getValue(id) { return document.getElementById(id).value; }
     function baseUrl() { return "https://rc-system-health-backend.onrender.com"; }
 
@@ -429,7 +431,8 @@ let latestFoods = [];
     const FOOD_IMAGE_EXTENSIONS = ['webp', 'png', 'jpg', 'jpeg', 'PNG'];
 
     function foodImageUrl(foodId, extensionIndex) {
-      return `/images/foods/${encodeURIComponent(foodId)}.${FOOD_IMAGE_EXTENSIONS[extensionIndex]}`;
+      const basePath = MEDIA_BASE_URL || "";
+      return `${basePath}/images/foods/${encodeURIComponent(foodId)}.${FOOD_IMAGE_EXTENSIONS[extensionIndex]}`;
     }
 
     function renderFoodImage(food) {

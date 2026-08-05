@@ -1,6 +1,17 @@
 let workoutPlan = null;
     let workoutHistory = null;
 
+    const MEDIA_BASE_URL = ""; // Change to CDN / Cloud Storage URL if migrating assets (e.g. "https://res.cloudinary.com/your-cloud-name")
+
+    function resolveMediaUrl(url) {
+      if (!url) return "";
+      if (url.startsWith("http://") || url.startsWith("https://")) {
+        return url;
+      }
+      const basePath = MEDIA_BASE_URL || "";
+      return basePath + url;
+    }
+
     function getTodayKey() {
       const now = new Date();
       const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -136,7 +147,7 @@ let workoutPlan = null;
         <article class="card">
           <video class="workout-preview" autoplay muted loop playsinline preload="metadata"
                  onclick="openWorkoutDetails(${workout.detailId})">
-            <source src="${escapeHtml(workout.videoUrl)}" type="video/mp4" />
+            <source src="${escapeHtml(resolveMediaUrl(workout.videoUrl))}" type="video/mp4" />
           </video>
           <span class="pill">${escapeHtml(workout.level)}</span>
           <span class="pill phase">${escapeHtml(workout.phase)}</span>
@@ -204,7 +215,7 @@ let workoutPlan = null;
       const workout = workoutPlan?.data?.find(item => item.detailId === detailId);
       if (!workout) return;
       const video = document.getElementById('modalVideo');
-      video.src = workout.videoUrl;
+      video.src = resolveMediaUrl(workout.videoUrl);
       video.load();
       video.play().catch(() => {});
       document.getElementById('modalTitle').textContent = workout.name;
