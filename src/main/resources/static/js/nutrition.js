@@ -347,7 +347,7 @@ let latestFoods = [];
       `).join('');
     }
 
-    const FOOD_IMAGE_EXTENSIONS = ['webp', 'png', 'jpg', 'jpeg'];
+    const FOOD_IMAGE_EXTENSIONS = ['webp', 'png', 'jpg', 'jpeg', 'PNG'];
 
     function foodImageUrl(foodId, extensionIndex) {
       return `/images/foods/${encodeURIComponent(foodId)}.${FOOD_IMAGE_EXTENSIONS[extensionIndex]}`;

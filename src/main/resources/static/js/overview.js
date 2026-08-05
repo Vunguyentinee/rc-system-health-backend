@@ -156,9 +156,8 @@ function getTodayKey() {
       return `Tháng ${date.getMonth() + 1}/${date.getFullYear()}`;
     }
 
-    function hasRatedItems(history) {
-      return Array.isArray(history?.data)
-        && history.data.some(item => item.rating !== null && item.rating !== undefined && item.rating !== '');
+    function hasCompletedItems(history) {
+      return Array.isArray(history?.data) && history.data.length > 0;
     }
 
     function fetchDailyHistory(endpoint, userId, dateKey) {
@@ -199,8 +198,8 @@ function getTodayKey() {
           dateKey === todayKey ? 'today' : ''
         ].filter(Boolean).join(' ');
         const titleParts = [];
-        if (status.food) titleParts.push('có đánh giá món ăn');
-        if (status.workout) titleParts.push('có đánh giá bài tập');
+        if (status.food) titleParts.push('đã ăn uống hôm nay');
+        if (status.workout) titleParts.push('đã tập luyện hôm nay');
         const title = titleParts.length ? `${dateKey}: ${titleParts.join(', ')}` : dateKey;
         const markers = active
           ? `<span class="markers">${status.food ? '<span class="calendar-badge food-badge">Ăn</span>' : ''}${status.workout ? '<span class="calendar-badge workout-badge">Tập</span>' : ''}</span>`
@@ -231,8 +230,8 @@ function getTodayKey() {
             fetchDailyHistory('/api/workouts/history', session.userId, dateKey)
           ]).then(([foodHistory, workoutHistory]) => ({
             dateKey,
-            food: hasRatedItems(foodHistory),
-            workout: hasRatedItems(workoutHistory)
+            food: hasCompletedItems(foodHistory),
+            workout: hasCompletedItems(workoutHistory)
           }))
         );
       }

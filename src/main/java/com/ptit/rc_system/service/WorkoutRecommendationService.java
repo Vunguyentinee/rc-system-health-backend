@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -126,6 +127,7 @@ public class WorkoutRecommendationService {
     }
 
     @Transactional
+    @CacheEvict(value = "workoutPlans", key = "#command.userId()")
     public Map<String, Object> complete(WorkoutCompletion command) {
         PlanDetail detail = findOwnedDetail(command.userId(), command.detailId(), command.exerciseId());
         if (Boolean.TRUE.equals(detail.getCompleted())) {
@@ -165,6 +167,7 @@ public class WorkoutRecommendationService {
     }
 
     @Transactional
+    @CacheEvict(value = "workoutPlans", key = "#command.userId()")
     public Map<String, Object> rate(WorkoutRating command) {
         if (command.rating() == null || command.rating() < 1 || command.rating() > 5) {
             throw new IllegalArgumentException("Điểm đánh giá phải nằm trong khoảng 1-5.");
