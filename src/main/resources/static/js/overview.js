@@ -6,6 +6,9 @@ function getTodayKey() {
     }
 
     function baseUrl() {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return window.location.origin;
+      }
       return "https://rc-system-health-backend.onrender.com";
     }
 
@@ -137,13 +140,56 @@ function getTodayKey() {
       const profileSummary = document.getElementById('profileSummary');
       const targetSummary = document.getElementById('targetSummary');
       if (!profile) {
-        profileSummary.textContent = 'Chưa có hồ sơ. Hãy cập nhật để tính toán mục tiêu calo.';
-        targetSummary.textContent = 'Chưa có dữ liệu mục tiêu.';
+        profileSummary.innerHTML = '<div class="muted">Chưa có hồ sơ. Hãy cập nhật để tính toán mục tiêu calo.</div>';
+        targetSummary.innerHTML = '<div class="muted">Chưa có dữ liệu mục tiêu.</div>';
         return;
       }
-      profileSummary.innerHTML = `Cân nặng: ${profile.weight || '-'} kg<br/>Chiều cao: ${profile.height || '-'} cm<br/>Tuổi: ${profile.age || '-'}<br/>Giới tính: ${genderLabel(profile.gender)}<br/>Mức vận động: ${activityLevelLabel(profile.activityLevel)}<br/>Mục tiêu: ${healthGoalLabel(profile.healthGoal)}`;
+      
+      profileSummary.innerHTML = `
+        <div class="profile-info-list">
+          <div class="profile-info-item">
+            <span class="info-icon">⚖️</span>
+            <span class="info-label">Cân nặng:</span>
+            <strong class="info-val">${profile.weight || '-'} kg</strong>
+          </div>
+          <div class="profile-info-item">
+            <span class="info-icon">📏</span>
+            <span class="info-label">Chiều cao:</span>
+            <strong class="info-val">${profile.height || '-'} cm</strong>
+          </div>
+          <div class="profile-info-item">
+            <span class="info-icon">🎂</span>
+            <span class="info-label">Tuổi:</span>
+            <strong class="info-val">${profile.age || '-'} tuổi</strong>
+          </div>
+          <div class="profile-info-item">
+            <span class="info-icon">👥</span>
+            <span class="info-label">Giới tính:</span>
+            <strong class="info-val">${genderLabel(profile.gender)}</strong>
+          </div>
+          <div class="profile-info-item">
+            <span class="info-icon">🏃</span>
+            <span class="info-label">Mức vận động:</span>
+            <strong class="info-val">${activityLevelLabel(profile.activityLevel)}</strong>
+          </div>
+          <div class="profile-info-item">
+            <span class="info-icon">🎯</span>
+            <span class="info-label">Mục tiêu:</span>
+            <strong class="info-val">${healthGoalLabel(profile.healthGoal)}</strong>
+          </div>
+        </div>
+      `;
+      
       const target = calculateTargetCalories(profile);
-      targetSummary.textContent = `Mục tiêu calo/ngày: ${target || '-'} kcal`;
+      targetSummary.innerHTML = `
+        <div class="target-calo-card">
+          <div class="target-calo-icon">🔥</div>
+          <div class="target-calo-info">
+            <span class="target-calo-label">Mục tiêu Calo ngày</span>
+            <span class="target-calo-val">${target || '-'} <small>kcal</small></span>
+          </div>
+        </div>
+      `;
     }
 
     function formatDateKey(date) {

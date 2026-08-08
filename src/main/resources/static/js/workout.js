@@ -1,6 +1,13 @@
 let workoutPlan = null;
     let workoutHistory = null;
 
+    function baseUrl() {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return window.location.origin;
+      }
+      return "https://rc-system-health-backend.onrender.com";
+    }
+
     const MEDIA_BASE_URL = ""; // Change to CDN / Cloud Storage URL if migrating assets (e.g. "https://res.cloudinary.com/your-cloud-name")
 
     function resolveMediaUrl(url) {
@@ -71,7 +78,7 @@ let workoutPlan = null;
     function hydrateSessionUser(session) {
       renderNavbar(session);
       if (!session || session.userName) return;
-      fetch(`https://rc-system-health-backend.onrender.com/api/auth/users/${session.userId}`)
+      fetch(`${baseUrl()}/api/auth/users/${session.userId}`)
         .then(res => res.ok ? res.json() : null)
         .then(user => {
           if (!user) return;
@@ -93,7 +100,7 @@ let workoutPlan = null;
       const session = ensureSession();
       if (!session) return;
       const query = new URLSearchParams({ userId: session.userId, regenerate });
-      apiJson(`https://rc-system-health-backend.onrender.com/api/workouts/recommend?${query}`)
+      apiJson(`${baseUrl()}/api/workouts/recommend?${query}`)
         .then(data => {
           workoutPlan = data;
           document.getElementById('workoutMessage').textContent =
@@ -109,7 +116,7 @@ let workoutPlan = null;
       const session = ensureSession();
       if (!session) return Promise.resolve();
       const query = new URLSearchParams({ userId: session.userId, date: getTodayKey() });
-      return apiJson(`https://rc-system-health-backend.onrender.com/api/workouts/history?${query}`)
+      return apiJson(`${baseUrl()}/api/workouts/history?${query}`)
         .then(data => {
           workoutHistory = data;
           renderWorkoutHistory();
@@ -120,7 +127,7 @@ let workoutPlan = null;
     function completeWorkout(detailId) {
       const session = ensureSession();
       if (!session) return;
-      apiJson(`https://rc-system-health-backend.onrender.com/api/workouts/complete`, {
+      apiJson(`${baseUrl()}/api/workouts/complete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: session.userId, detailId })
@@ -132,7 +139,7 @@ let workoutPlan = null;
     function rateWorkout(detailId, rating) {
       const session = ensureSession();
       if (!session) return;
-      apiJson(`https://rc-system-health-backend.onrender.com/api/workouts/rate`, {
+      apiJson(`${baseUrl()}/api/workouts/rate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: session.userId, detailId, rating })

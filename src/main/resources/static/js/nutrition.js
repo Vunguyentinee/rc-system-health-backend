@@ -10,7 +10,12 @@ let latestFoods = [];
     const MEDIA_BASE_URL = ""; // Change to CDN / Cloud Storage URL if migrating assets (e.g. "https://res.cloudinary.com/your-cloud-name")
 
     function getValue(id) { return document.getElementById(id).value; }
-    function baseUrl() { return "https://rc-system-health-backend.onrender.com"; }
+    function baseUrl() {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return window.location.origin;
+      }
+      return "https://rc-system-health-backend.onrender.com";
+    }
 
     function getSession() {
       const raw = localStorage.getItem('session');
