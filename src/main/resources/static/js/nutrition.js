@@ -11,15 +11,21 @@ let latestFoods = [];
 
     function getValue(id) { return document.getElementById(id).value; }
     function baseUrl() {
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return window.location.origin;
-      }
-      return "https://rc-system-health-backend.onrender.com";
+      return window.location.origin;
     }
 
     function getSession() {
       const raw = localStorage.getItem('session');
       return raw ? JSON.parse(raw) : null;
+    }
+
+    function authFetch(url, options = {}) {
+      const session = getSession();
+      const headers = new Headers(options.headers || {});
+      if (session && session.token) {
+        headers.set('Authorization', 'Bearer ' + session.token);
+      }
+      return fetch(url, Object.assign({}, options, { headers }));
     }
 
     function getProfile(userId) {
@@ -46,7 +52,7 @@ let latestFoods = [];
     }
 
     function fetchProfile(userId) {
-      return fetch(`${baseUrl()}/api/health-profiles/${userId}`)
+      return authFetch(`${baseUrl()}/api/health-profiles/${userId}`)
         .then(res => {
           if (res.status === 404) {
             localStorage.removeItem(`profile_${userId}`);
@@ -85,7 +91,7 @@ let latestFoods = [];
     function hydrateSessionUser(session) {
       updateSessionInfo();
       if (!session || session.userName) return;
-      fetch(`${baseUrl()}/api/auth/users/${session.userId}`)
+      authFetch(`${baseUrl()}/api/auth/users/${session.userId}`)
         .then(res => res.ok ? res.json() : null)
         .then(user => {
           if (!user) return;
@@ -184,7 +190,7 @@ let latestFoods = [];
         healthGoal: getValue('healthGoal'),
         fitnessLevel: getValue('fitnessLevel')
       };
-      fetch(`${baseUrl()}/api/health-profiles`, {
+      authFetch(`${baseUrl()}/api/health-profiles`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -282,7 +288,7 @@ let latestFoods = [];
 
     function loadPopularFoods() {
       const url = `${baseUrl()}/api/recommend-popular?topK=20`;
-      fetch(url)
+      authFetch(url)
         .then(res => res.json())
         .then(data => {
           const foods = data.data || [];
@@ -303,7 +309,7 @@ let latestFoods = [];
       
       const fetchPromise = allOnboardFoods.length > 0 
         ? Promise.resolve(allOnboardFoods)
-        : fetch(`${baseUrl()}/api/admin/foods`)
+        : authFetch(`${baseUrl()}/api/admin/foods`)
             .then(res => res.json())
             .then(data => {
               allOnboardFoods = data || [];
@@ -334,7 +340,7 @@ let latestFoods = [];
         return;
       }
 
-      fetch(`${baseUrl()}/api/nutrition/favorites`, {
+      authFetch(`${baseUrl()}/api/nutrition/favorites`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, foodIds: selected, rating: 5 })
@@ -361,7 +367,7 @@ let latestFoods = [];
       if (!session) return;
       const userId = session.userId;
       const url = `${baseUrl()}/api/nutrition/plan?userId=${userId}&regenerate=${regenerate}`;
-      fetch(url)
+      authFetch(url)
         .then(res => res.json().then(data => {
           if (!res.ok) {
             throw new Error(data.error || 'Không thể xử lý yêu cầu.');
@@ -380,7 +386,7 @@ let latestFoods = [];
           renderCalories(latestFoods);
           document.getElementById('dashMsg').textContent = `Đã tải lên ${latestFoods.length} món.`;
           
-          return fetch(`${baseUrl()}/api/nutrition/history?userId=${userId}`);
+          return authFetch(`${baseUrl()}/api/nutrition/history?userId=${userId}`);
         })
         .then(res => res && res.ok ? res.json() : null)
         .then(historyData => {
@@ -561,7 +567,7 @@ let latestFoods = [];
       const food = latestFoods.find(item => item.id === selectedFoodId);
       if (!food) return;
       const url = `${baseUrl()}/api/nutrition/rate`;
-      fetch(url, {
+      authFetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -589,7 +595,7 @@ let latestFoods = [];
 
     function loadAdminFoods() {
       const url = `${baseUrl()}/api/admin/foods`;
-      fetch(url)
+      authFetch(url)
         .then(res => res.json())
         .then(data => {
           const rows = data.map(food => `
@@ -608,7 +614,7 @@ let latestFoods = [];
 
     function selectFood(id) {
       const url = `${baseUrl()}/api/admin/foods/${id}`;
-      fetch(url)
+      authFetch(url)
         .then(res => res.json())
         .then(food => {
           document.getElementById('adminName').value = food.name || '';
@@ -639,7 +645,7 @@ let latestFoods = [];
 
     function createFood() {
       const url = `${baseUrl()}/api/admin/foods`;
-      fetch(url, {
+      authFetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(buildFoodPayload())
@@ -653,7 +659,7 @@ let latestFoods = [];
       const selectedId = document.getElementById('adminMsg').dataset.selectedId;
       if (!selectedId) { document.getElementById('adminMsg').textContent = 'Chưa chọn món để cập nhật.'; return; }
       const url = `${baseUrl()}/api/admin/foods/${selectedId}`;
-      fetch(url, {
+      authFetch(url, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(buildFoodPayload())
@@ -667,7 +673,7 @@ let latestFoods = [];
       const selectedId = document.getElementById('adminMsg').dataset.selectedId;
       if (!selectedId) { document.getElementById('adminMsg').textContent = 'Chưa chọn món để xóa.'; return; }
       const url = `${baseUrl()}/api/admin/foods/${selectedId}`;
-      fetch(url, { method: 'DELETE' })
+      authFetch(url, { method: 'DELETE' })
         .then(res => res.json())
         .then(() => { document.getElementById('adminMsg').textContent = 'Đã xóa món.'; loadAdminFoods(); })
         .catch(err => { document.getElementById('adminMsg').textContent = err.message; });

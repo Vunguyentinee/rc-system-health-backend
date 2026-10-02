@@ -2,10 +2,7 @@ let workoutPlan = null;
     let workoutHistory = null;
 
     function baseUrl() {
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return window.location.origin;
-      }
-      return "https://rc-system-health-backend.onrender.com";
+      return window.location.origin;
     }
 
     const MEDIA_BASE_URL = ""; // Change to CDN / Cloud Storage URL if migrating assets (e.g. "https://res.cloudinary.com/your-cloud-name")
@@ -29,6 +26,15 @@ let workoutPlan = null;
     function getSession() {
       const raw = localStorage.getItem('session');
       return raw ? JSON.parse(raw) : null;
+    }
+
+    function authFetch(url, options = {}) {
+      const session = getSession();
+      const headers = new Headers(options.headers || {});
+      if (session && session.token) {
+        headers.set('Authorization', 'Bearer ' + session.token);
+      }
+      return fetch(url, Object.assign({}, options, { headers }));
     }
 
     function ensureSession() {
@@ -78,7 +84,7 @@ let workoutPlan = null;
     function hydrateSessionUser(session) {
       renderNavbar(session);
       if (!session || session.userName) return;
-      fetch(`${baseUrl()}/api/auth/users/${session.userId}`)
+      authFetch(`${baseUrl()}/api/auth/users/${session.userId}`)
         .then(res => res.ok ? res.json() : null)
         .then(user => {
           if (!user) return;
@@ -90,7 +96,7 @@ let workoutPlan = null;
     }
 
     function apiJson(url, options) {
-      return fetch(url, options).then(res => res.json().then(data => {
+      return authFetch(url, options).then(res => res.json().then(data => {
         if (!res.ok) throw new Error(data.message || 'Không thể xử lý yêu cầu.');
         return data;
       }));

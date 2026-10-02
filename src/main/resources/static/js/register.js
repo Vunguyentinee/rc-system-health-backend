@@ -1,12 +1,9 @@
-function setSession(userId, userName, role) {
-      localStorage.setItem('session', JSON.stringify({ userId, userName, role }));
+function setSession(userId, userName, role, token) {
+      localStorage.setItem('session', JSON.stringify({ userId, userName, role, token }));
     }
 
     function baseUrl() {
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return window.location.origin;
-      }
-      return "https://rc-system-health-backend.onrender.com";
+      return window.location.origin;
     }
 
     function register() {
@@ -49,7 +46,7 @@ function setSession(userId, userName, role) {
           // Đăng ký thành công
           msgEl.textContent = 'Đăng ký tài khoản thành công! Đang chuyển hướng...';
           msgEl.style.color = '#38a169';
-          setSession(data.userId, data.userName, data.role || 'user');
+          setSession(data.userId, data.userName, data.role || 'user', data.token);
           
           setTimeout(() => {
             window.location.href = 'overview.html';

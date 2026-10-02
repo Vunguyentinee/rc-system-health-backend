@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.ColumnDefault;
 import java.time.LocalDateTime;
 
 @Entity
@@ -24,6 +25,10 @@ public class User {
 
     @Column(name = "Email", nullable = false)
     private String email;
+
+    @Column(name = "Role", nullable = false, columnDefinition = "varchar(20)")
+    @ColumnDefault("'USER'")
+    private String role = "USER";
 
     @Column(name = "CreateAt")
     private LocalDateTime createAt;
@@ -58,6 +63,14 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public LocalDateTime getCreateAt() {

@@ -31,18 +31,24 @@ public class AiRecommendationClient {
     public AiRecommendationClient(
             ObjectMapper objectMapper,
             @Value("${ai.recommendation.base-url}") String baseUrl,
+            @Value("${ai.recommendation.api-key}") String apiKey,
             @Value("${ai.recommendation.endpoints.user-based:/api/ai/recommend/user}") String userBasedPath,
             @Value("${ai.recommendation.endpoints.item-based:/api/ai/recommend/item}") String itemBasedPath,
             @Value("${ai.recommendation.endpoints.hybrid:/api/ai/recommend/hybrid}") String hybridPath,
             @Value("${ai.recommendation.endpoints.top-rated:/api/ai/recommend/top-rated}") String topRatedPath,
             @Value("${ai.recommendation.connect-timeout-ms:2000}") long connectTimeoutMs,
             @Value("${ai.recommendation.read-timeout-ms:5000}") long readTimeoutMs) {
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new IllegalStateException("ai.recommendation.api-key must be set (AI_SERVICE_API_KEY env var) " +
+                    "so calls to the AI service can be authenticated");
+        }
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(Duration.ofMillis(connectTimeoutMs));
         factory.setReadTimeout(Duration.ofMillis(readTimeoutMs));
-        
+
         this.restClient = RestClient.builder()
                 .baseUrl(trimTrailingSlash(baseUrl))
+                .defaultHeader("X-Internal-Api-Key", apiKey)
                 .requestFactory(factory)
                 .build();
         this.objectMapper = objectMapper;

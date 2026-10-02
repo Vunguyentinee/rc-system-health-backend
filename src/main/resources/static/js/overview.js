@@ -6,10 +6,7 @@ function getTodayKey() {
     }
 
     function baseUrl() {
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return window.location.origin;
-      }
-      return "https://rc-system-health-backend.onrender.com";
+      return window.location.origin;
     }
 
     let activityCalendarDate = new Date();
@@ -17,6 +14,15 @@ function getTodayKey() {
     function getSession() {
       const raw = localStorage.getItem('session');
       return raw ? JSON.parse(raw) : null;
+    }
+
+    function authFetch(url, options = {}) {
+      const session = getSession();
+      const headers = new Headers(options.headers || {});
+      if (session && session.token) {
+        headers.set('Authorization', 'Bearer ' + session.token);
+      }
+      return fetch(url, Object.assign({}, options, { headers }));
     }
 
     function ensureSession() {
@@ -45,7 +51,7 @@ function getTodayKey() {
     function hydrateSessionUser(session) {
       renderNavbar(session);
       if (!session || session.userName) return;
-      fetch(`${baseUrl()}/api/auth/users/${session.userId}`)
+      authFetch(`${baseUrl()}/api/auth/users/${session.userId}`)
         .then(res => res.ok ? res.json() : null)
         .then(user => {
           if (!user) return;
@@ -78,7 +84,7 @@ function getTodayKey() {
     }
 
     function fetchProfile(userId) {
-      return fetch(`${baseUrl()}/api/health-profiles/${userId}`)
+      return authFetch(`${baseUrl()}/api/health-profiles/${userId}`)
         .then(res => {
           if (res.status === 404) {
             localStorage.removeItem(`profile_${userId}`);
@@ -208,7 +214,7 @@ function getTodayKey() {
 
     function fetchDailyHistory(endpoint, userId, dateKey) {
       const query = new URLSearchParams({ userId, date: dateKey });
-      return fetch(`${baseUrl()}${endpoint}?${query}`)
+      return authFetch(`${baseUrl()}${endpoint}?${query}`)
         .then(res => res.ok ? res.json() : null)
         .catch(() => null);
     }
@@ -311,7 +317,7 @@ function getTodayKey() {
 
     function renderFoodSummary(session) {
       const query = new URLSearchParams({ userId: session.userId, date: getTodayKey() });
-      fetch(`${baseUrl()}/api/nutrition/history?${query}`)
+      authFetch(`${baseUrl()}/api/nutrition/history?${query}`)
         .then(res => res.json().then(data => {
           if (!res.ok) throw new Error(data.message || 'Không thể tải lịch sử món ăn.');
           return data;
@@ -341,7 +347,7 @@ function getTodayKey() {
 
     function renderWorkoutSummary(session) {
       const query = new URLSearchParams({ userId: session.userId, date: getTodayKey() });
-      fetch(`${baseUrl()}/api/workouts/history?${query}`)
+      authFetch(`${baseUrl()}/api/workouts/history?${query}`)
         .then(res => res.json().then(data => {
           if (!res.ok) throw new Error(data.message || 'Không thể tải lịch sử bài tập.');
           return data;
