@@ -1,0 +1,13 @@
+name: Keep Render backend awake
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend to prevent Render free-tier sleep
+        run: curl -fsS "https://rc-system-health-backend.onrender.com/" -o /dev/null
