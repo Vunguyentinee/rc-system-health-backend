@@ -10,4 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping backend to prevent Render free-tier sleep
-        run: curl -fsS "https://rc-system-health-backend.onrender.com/" -o /dev/null
+        run: curl -fsS "https://recommend-system-food-excercise.onrender.com/" -o /dev/null

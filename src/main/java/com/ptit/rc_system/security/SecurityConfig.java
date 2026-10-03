@@ -25,7 +25,7 @@ public class SecurityConfig {
 
     private final JwtRequestFilter jwtRequestFilter;
 
-    @Value("${app.cors.allowed-origin-patterns:http://localhost:*,http://127.0.0.1:*,https://rc-system-health-backend.onrender.com}")
+    @Value("${app.cors.allowed-origin-patterns:http://localhost:*,http://127.0.0.1:*,https://recommend-system-food-excercise.onrender.com}")
     private List<String> allowedOriginPatterns;
 
     public SecurityConfig(JwtRequestFilter jwtRequestFilter) {
